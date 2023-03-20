@@ -6,6 +6,6 @@ public class FormulaReciever : MonoBehaviour
 {
     public void RecieveFormula(Formula formula)
     {
-
+        Debug.Log(gameObject.name + " recieve");
     }
 }

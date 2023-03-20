@@ -6,8 +6,8 @@ public class GlobalPhysic : MonoBehaviour
 {
     public static GlobalPhysic instance;
 
-    [SerializeField] private float _gravity = -9.8f;
-    public float gravity
+    [SerializeField] private Vector2 _gravity = new Vector2(0, -9.8f);
+    public Vector2 gravity
     {
         get
         {
@@ -16,7 +16,7 @@ public class GlobalPhysic : MonoBehaviour
         set
         {
             _gravity = value;
-            Physics2D.gravity = new Vector3(0, _gravity);
+            Physics2D.gravity = _gravity;
         }
     }
     private void Awake()

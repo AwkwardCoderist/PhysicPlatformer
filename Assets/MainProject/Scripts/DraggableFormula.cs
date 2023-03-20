@@ -13,10 +13,12 @@ public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IB
 {
     [SerializeField] private Transform dragContainer;
     [SerializeField] private Formula formula;
+    [SerializeField] private Physics2DRaycaster physics2DRaycaster;
 
     private RectTransform obj;
     private Transform defaultParent;
     private Vector2 defaultPos;
+    private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
     private void Start()
     {
@@ -43,9 +45,15 @@ public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IB
 
     public void OnDrop(PointerEventData eventData)
     {
-        if (eventData.pointerDrag.TryGetComponent(out FormulaReciever reciever))
+        physics2DRaycaster.Raycast(eventData, raycastResults);
+        foreach (RaycastResult raycastResult in raycastResults)
         {
-            reciever.RecieveFormula(formula);
+            Debug.Log(raycastResult.gameObject);
+            if(raycastResult.gameObject.TryGetComponent(out FormulaReciever reciever))
+            {
+                reciever.RecieveFormula(formula);
+            }
         }
     }
+
 }
