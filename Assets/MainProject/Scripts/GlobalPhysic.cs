@@ -27,6 +27,15 @@ public class GlobalPhysic : MonoBehaviour
             Destroy(this);
     }
 
-
+    public void OnChangeX(float value) 
+    { 
+        _gravity.x = value;
+        gravity = _gravity;
+    }
+    public void OnChangeY(float value)
+    {
+        _gravity.y = value;
+        gravity = _gravity;
+    }
 
 }

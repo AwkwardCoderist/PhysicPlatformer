@@ -6,7 +6,9 @@ using UnityEngine.EventSystems;
 
 public enum Formula
 {
-    Force
+    Force,
+    Density,
+    Velocity
 }
 
 public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDragHandler, IDropHandler
