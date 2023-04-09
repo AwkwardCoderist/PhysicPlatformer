@@ -8,7 +8,10 @@ public enum Formula
 {
     Force,
     Density,
-    Velocity
+    Velocity,
+    Elasticity,
+    Area,
+    Friction
 }
 
 public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDragHandler, IDropHandler
@@ -21,12 +24,14 @@ public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IB
     private Transform defaultParent;
     private Vector2 defaultPos;
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
+    private int defaultChildIndex;
 
     private void Start()
     {
         obj = GetComponent<RectTransform>();
         defaultPos = obj.anchoredPosition;
         defaultParent = obj.parent;
+        defaultChildIndex = transform.GetSiblingIndex();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -42,6 +47,7 @@ public class DraggableFormula : MonoBehaviour, IDragHandler, IEndDragHandler, IB
     public void OnEndDrag(PointerEventData eventData)
     {
         obj.SetParent(defaultParent);
+        obj.SetSiblingIndex(defaultChildIndex);
         obj.anchoredPosition = defaultPos;
     }
 

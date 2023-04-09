@@ -31,6 +31,9 @@ public class PhysicObject : MonoBehaviour
     [SerializeField] private Collider2D col;
     [SerializeField] private float _mass;
     [SerializeField] private float _volume;
+    [SerializeField] private Vector2 _size;
+    [SerializeField] private float _bounciness = 0;
+    [SerializeField] private float _friction = 0.4f;
     [SerializeField] private float _timeScale;
     [SerializeField] private float _timePosition;
     [SerializeField] private float recordInterval;
@@ -40,11 +43,11 @@ public class PhysicObject : MonoBehaviour
     public bool doRecords = true;
     public float stopTime = 0;
     public float timeline = 0;
+    private float rbTime = 0;
     private int posRotRight;
     private int posRotLeft;
     private float lerpVal;
-    private Vector2 lerpVelocity;
-    private float lerpAngularVelocity;
+    private PhysicsMaterial2D physicsMaterial2D;
 
     public float mass
     {
@@ -69,8 +72,56 @@ public class PhysicObject : MonoBehaviour
         set
         {
             _volume = value;
-            transform.localScale = Vector2.one * value;
+            transform.localScale = _size * value;
             
+        }
+    }
+
+    public float width
+    {
+        get
+        {
+            return _size.x;
+        }
+        set
+        {
+            _size.x = value;
+            transform.localScale = _size * _volume;
+        }
+    }
+    public float height
+    {
+        get
+        {
+            return _size.y;
+        }
+        set
+        {
+            _size.y = value;
+            transform.localScale = _size * _volume;
+        }
+    }
+
+    public float bounciness
+    {
+        get
+        {
+            return physicsMaterial2D.bounciness;
+        }
+        set
+        {
+            _bounciness = value;
+        }
+    }
+    public float friction
+    {
+        get
+        {
+            return physicsMaterial2D.friction;
+        }
+        set
+        {
+            _friction = value;
         }
     }
 
@@ -100,8 +151,12 @@ public class PhysicObject : MonoBehaviour
     private void Start()
     {
         _mass = rb.mass;
-        _volume = transform.localScale.x;
+        _volume = 1;
+        _size = transform.localScale;
         timeScale = 1;
+
+        physicsMaterial2D = new PhysicsMaterial2D();
+
     }
 
     private void Update()
@@ -116,29 +171,28 @@ public class PhysicObject : MonoBehaviour
         {
             rb.AddForce(Physics2D.gravity * timeScale, ForceMode2D.Force);
         }
+
+        physicsMaterial2D.bounciness = _bounciness;
+        physicsMaterial2D.friction = _friction;
+
+        rb.sharedMaterial = physicsMaterial2D;
+        col.sharedMaterial = physicsMaterial2D;
+
     }
 
     private void UpdateRecording()
     {
         if (doRecords)
         {
-
-            if (lerpVelocity != Vector2.zero && lerpAngularVelocity != 0)
-            {
-                rb.velocity = lerpVelocity;
-                rb.angularVelocity = lerpAngularVelocity;
-                rb.velocity = Vector2.zero;
-                rb.angularVelocity = 0;
-            }
-
+            
             rb.isKinematic = false;
 
-            if (Time.time > lastRecord + recordInterval)
+            if (rbTime > lastRecord + recordInterval)
             {
 
-                posRots.Add(new PosRot(transform.position, transform.rotation, Time.time, rb.velocity, rb.angularVelocity));
+                posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.velocity, rb.angularVelocity));
                 if (posRots.Count > maxPosRots) posRots.RemoveAt(0);
-                lastRecord = Time.time;
+                lastRecord = rbTime;
             }
 
             if (posRots.Count > 2)
@@ -147,13 +201,11 @@ public class PhysicObject : MonoBehaviour
                 posRotLeft = posRots.Count - 2;
             }
 
-            stopTime = Time.time;
+            stopTime = rbTime;
         }
         else
         {
             rb.isKinematic = true;
-            rb.velocity = Vector2.zero;
-            rb.angularVelocity = 0;
 
             timeline = stopTime + timePosition;
 
@@ -179,10 +231,14 @@ public class PhysicObject : MonoBehaviour
 
             transform.position = Vector2.Lerp(posRots[posRotRight].position, posRots[posRotLeft].position, lerpVal);
             transform.rotation = Quaternion.Lerp(posRots[posRotRight].rotation, posRots[posRotLeft].rotation, lerpVal);
-            
-            lerpVelocity = Vector2.Lerp(posRots[posRotRight].velocity, posRots[posRotLeft].velocity, lerpVal);
-            lerpAngularVelocity = Mathf.Lerp(posRots[posRotRight].torque, posRots[posRotLeft].torque, lerpVal);
+
+            rb.velocity = Vector2.Lerp(posRots[posRotRight].velocity, posRots[posRotLeft].velocity, lerpVal);
+            rb.angularVelocity = Mathf.Lerp(posRots[posRotRight].torque, posRots[posRotLeft].torque, lerpVal);
         }
+
+        if (rb.velocity.magnitude > 0.01f)
+            rbTime += Time.deltaTime;
+
     }
 
 

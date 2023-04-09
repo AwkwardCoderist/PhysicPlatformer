@@ -8,4 +8,8 @@ public class FormulaLimits : ScriptableObject
     public Vector2 massLimit;
     public Vector2 volumeLimit;
     public Vector2 timePositionLimit;
+    public Vector2 elastityKoefLimit;
+    public Vector2 heightLimit;
+    public Vector2 widthtLimit;
+    public Vector2 frictionKoefLimit;
 }

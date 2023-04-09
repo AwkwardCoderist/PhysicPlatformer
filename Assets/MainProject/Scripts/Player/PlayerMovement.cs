@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float groundAcceleration = 1;
     [SerializeField] private float airAcceleration = 1;
+    [SerializeField] private float waterAcceleration = 1;
     [SerializeField] private float jumpForce = 1;
     [SerializeField] private float jumpDelay = 0.5f;
     private float lastGround = 0;
@@ -20,29 +21,37 @@ public class PlayerMovement : MonoBehaviour
     
 
 
-    private float moveInput;
+    private Vector2 moveInput;
     private bool jumpInput;
     private bool useInput;
+    private bool stickInput;
     private Vector2 mousePosInput;
 
     [Header("Params")]
     private RaycastHit2D groundHit;
     private float gravityAngle;
 
+    [Header("Fixed Joint")]
+    [SerializeField] private FixedJoint2D fixedJoint2D;
 
     public void OnMove(InputValue value)
     {
-        moveInput = value.Get<float>();
+        moveInput = value.Get<Vector2>();
     }
 
     public void OnJump(InputValue value)
     {
-        jumpInput = value.Get<float>() == 1 ? true : false;
+        jumpInput = value.Get<float>() == 1;
     }
 
     public void OnUse(InputValue value)
     {
-        useInput = value.Get<float>() == 1 ? true : false;
+        useInput = value.Get<float>() == 1;
+    }
+
+    public void OnStick(InputValue value)
+    {
+        stickInput = value.Get<float>() == 1;
     }
 
     public void OnMousePos(InputValue value)
@@ -61,34 +70,82 @@ public class PlayerMovement : MonoBehaviour
     {
         if (rb)
         {
-
-            float acceleration = groundHit ? groundAcceleration : airAcceleration;
-
-            rb.AddForce(transform.right * moveInput * acceleration * Time.deltaTime, ForceMode2D.Force);
-
-            if (jumpInput && groundHit && Time.time > lastGround + jumpDelay)
+            if (stickInput)
             {
-                rb.AddForce(transform.up * jumpForce * Time.deltaTime, ForceMode2D.Impulse);
-            }
-        }
+                if (groundHit && !fixedJoint2D.enabled)
+                {
+                    if (groundHit.collider.TryGetComponent(out Rigidbody2D body))
+                    {
+                        rb.freezeRotation = false;
+                        fixedJoint2D.connectedBody = body;
+                    }
+                    else
+                        fixedJoint2D.connectedBody = null;
 
+                    fixedJoint2D.enabled = true;
+                }
+            }
+            else
+                fixedJoint2D.enabled = false;
+
+            if (groundHit)
+            {
+                if (groundHit.collider.gameObject.layer == LayerMask.NameToLayer("Water"))
+                {
+                    rb.AddForce(moveInput * waterAcceleration * Time.deltaTime, ForceMode2D.Force);
+
+                    if (jumpInput && Time.time > lastGround + jumpDelay)
+                    {
+                        rb.AddForce(transform.up * jumpForce * Time.deltaTime, ForceMode2D.Impulse);
+                    }
+                }
+                else
+                {
+                    float acceleration = groundHit ? groundAcceleration : airAcceleration;
+
+                    rb.AddForce((groundHit ? transform.right : Vector3.right) * moveInput * acceleration * Time.deltaTime, ForceMode2D.Force);
+
+                    if (jumpInput && Time.time > lastGround + jumpDelay)
+                    {
+                        rb.AddForce(transform.up * jumpForce * Time.deltaTime, ForceMode2D.Impulse);
+                    }
+                }
+            }
+
+            else
+            {
+                if (!groundHit)
+                    rb.AddForce(moveInput * airAcceleration * Time.deltaTime, ForceMode2D.Force);
+            }            
+        }
     }
 
     private void UpdateTorque()
     {
         if (rb)
         {
-            if (groundHit)
+            if (fixedJoint2D.enabled == false)
             {
-                rb.freezeRotation = true;
-                rb.SetRotation(gravityAngle);
-            }
-            else
-            {
-                rb.freezeRotation = false;
-                rb.AddTorque(gravityAngle * rotateForce * Time.deltaTime);
-            }
+                if (groundHit)
+                {
+                    if (groundHit.collider.gameObject.layer == LayerMask.NameToLayer("Water"))
+                    {
 
+                        rb.freezeRotation = false;
+                        rb.AddTorque(Vector3.SignedAngle(transform.up, rb.velocity, transform.forward));
+                    }
+                    else
+                    {
+                        rb.freezeRotation = true;
+                        rb.SetRotation(gravityAngle);
+                    }                    
+                }
+                else
+                {
+                    rb.freezeRotation = false;
+                    rb.AddTorque(gravityAngle * rotateForce * Time.deltaTime);
+                }
+            }
         }
     }
 

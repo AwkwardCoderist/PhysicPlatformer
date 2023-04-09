@@ -5,20 +5,22 @@ using UnityEngine.EventSystems;
 
 public class GravityUI : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDragHandler
 {
-    [SerializeField] private RectTransform parentObj;
+    [SerializeField] private Canvas parentCanvas;
     private RectTransform obj;
     public Vector3 dir;
     public float xLimit;
     public float yLimit;
+    public float forcePerUnit = 1;
 
     private Vector2 xLimits;
     private Vector2 yLimits;
 
-    private float width;
+    private Vector2 defaulGravity;
 
     private void Start()
     {
         obj = GetComponent<RectTransform>();
+        defaulGravity = Physics2D.gravity;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -28,15 +30,15 @@ public class GravityUI : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDra
 
     public void OnDrag(PointerEventData eventData)
     {
-        Vector3 newPos = eventData.position;
-        newPos.x = Mathf.Clamp(newPos.x, parentObj.position.x + parentObj.rect.xMin, parentObj.position.x + parentObj.rect.xMax);
-        newPos.y = Mathf.Clamp(newPos.y, parentObj.position.y + parentObj.rect.yMin, parentObj.position.y + parentObj.rect.yMax);
-        
-        obj.position = newPos;
+        //RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, eventData.position, Camera.main, out Vector2 localPoint);
+
+        obj.position = eventData.position;
+
+        obj.anchoredPosition = new Vector2(Mathf.Clamp(obj.anchoredPosition.x, -xLimit, xLimit), Mathf.Clamp(obj.anchoredPosition.y, -yLimit, yLimit));
 
         dir = CalculateDir();
 
-        Physics2D.gravity = dir;
+        Physics2D.gravity = dir * forcePerUnit;
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -46,7 +48,13 @@ public class GravityUI : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDra
 
     private Vector3 CalculateDir()
     {
-        return (obj.position - parentObj.position);
+        return (obj.position - obj.parent.position);
+    }
+
+    public void ResetKnobPos()
+    {
+        obj.anchoredPosition = new Vector2(defaulGravity.x / forcePerUnit, defaulGravity.y / forcePerUnit);
+        Physics2D.gravity = defaulGravity;
     }
 
 }

@@ -23,6 +23,21 @@ public class FormulaManager : MonoBehaviour
     [SerializeField] private Slider distanceSlider;
     [SerializeField] private Slider timePositionSlider;
 
+    [Header("Elasticity Formula")]
+    [SerializeField] private GameObject elasticityUI;
+    [SerializeField] private Slider elasticKoefSlider;
+    [SerializeField] private Slider stretchLengthSlider;
+
+    [Header("Area Formula")]
+    [SerializeField] private GameObject areaUI;
+    [SerializeField] private Slider heightSlider;
+    [SerializeField] private Slider widthSlider;
+
+    [Header("Friction Formula")]
+    [SerializeField] private GameObject frictionUI;
+    [SerializeField] private Slider frictionKoefSlider;
+    [SerializeField] private Slider weightSlider;
+
     private PhysicObject activeObject;
     private Formula activeFormula;
 
@@ -81,6 +96,41 @@ public class FormulaManager : MonoBehaviour
                     velocityUI.SetActive(true);
 
                     break;
+                case Formula.Elasticity:
+                    elasticKoefSlider.onValueChanged.RemoveAllListeners();
+                    stretchLengthSlider.onValueChanged.RemoveAllListeners();
+
+                    SetSliderValues(elasticKoefSlider, limits.elastityKoefLimit, activeObject.bounciness);
+
+                    elasticKoefSlider.onValueChanged.AddListener((x) => { activeObject.bounciness = x; });
+
+                    elasticityUI.SetActive(true);
+
+                    break;
+                case Formula.Area:
+
+                    heightSlider.onValueChanged.RemoveAllListeners();
+                    widthSlider.onValueChanged.RemoveAllListeners();
+
+                    SetSliderValues(heightSlider, limits.heightLimit, activeObject.height);
+                    SetSliderValues(widthSlider, limits.widthtLimit, activeObject.width);
+
+                    heightSlider.onValueChanged.AddListener((x) => { activeObject.height = x; });
+                    widthSlider.onValueChanged.AddListener((x) => { activeObject.width = x; });
+
+                    areaUI.SetActive(true);
+
+                    break;
+
+                case Formula.Friction:
+                    frictionKoefSlider.onValueChanged.RemoveAllListeners();
+
+                    SetSliderValues(frictionKoefSlider, limits.frictionKoefLimit, activeObject.bounciness);
+
+                    frictionKoefSlider.onValueChanged.AddListener((x) => { activeObject.friction = x; });
+
+                    frictionUI.SetActive(true);
+                    break;
                 default:
                     break;
             }
@@ -101,6 +151,9 @@ public class FormulaManager : MonoBehaviour
         forceUI.SetActive(false);
         densityUI.SetActive(false);
         velocityUI.SetActive(false);
+        elasticityUI.SetActive(false);
+        areaUI.SetActive(false);
+        frictionUI.SetActive(false);
     }
 
     private void ResetActiveObject()
