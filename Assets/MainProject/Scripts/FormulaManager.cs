@@ -84,7 +84,7 @@ public class FormulaManager : MonoBehaviour
                     distanceSlider.onValueChanged.RemoveAllListeners();
                     timePositionSlider.onValueChanged.RemoveAllListeners();
                     
-                    activeObject.doRecords = false;
+                    activeObject.DoRecords = false;
                     activeObject.timePosition = 0;
 
                     SetSliderValues(distanceSlider, limits.timePositionLimit, activeObject.mass);
@@ -158,7 +158,7 @@ public class FormulaManager : MonoBehaviour
 
     private void ResetActiveObject()
     {
-        activeObject.doRecords = true;
+        activeObject.DoRecords = true;
         
     }
 }

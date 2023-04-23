@@ -40,7 +40,19 @@ public class PhysicObject : MonoBehaviour
     [SerializeField] private int maxPosRots;
     private List<PosRot> posRots = new List<PosRot>();
     private float lastRecord = 0;
-    public bool doRecords = true;
+    private bool doRecords = true;
+    public bool DoRecords
+    {
+        get => doRecords;
+        set
+        {
+            doRecords = value;
+            if(!doRecords)
+                CreatePosRotPoint();
+
+        }
+    }
+
     public float stopTime = 0;
     public float timeline = 0;
     private float rbTime = 0;
@@ -48,6 +60,27 @@ public class PhysicObject : MonoBehaviour
     private int posRotLeft;
     private float lerpVal;
     private PhysicsMaterial2D physicsMaterial2D;
+    private List<Joint2D> stickedObjects = new List<Joint2D>();
+
+    private bool freezed;
+    public bool Freezed
+    {
+        get => freezed;
+        set
+        {
+            freezed = value;
+            if (freezed)
+            {
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0;
+                posRots.Clear();
+            }
+            else
+            {
+
+            }
+        }
+    }
 
     public float mass
     {
@@ -58,8 +91,23 @@ public class PhysicObject : MonoBehaviour
         set
         {
             _mass = value;
-            rb.mass = Mathf.Abs(value);
+            if (rb.useAutoMass)
+                density = _mass / volume;
+            else
+                rb.mass = Mathf.Abs(value);
             rb.gravityScale = value;
+        }
+    }
+
+    public float density
+    {
+        get
+        {
+            return col.density;
+        }
+        set
+        {
+            col.density = value;
         }
     }
 
@@ -72,6 +120,8 @@ public class PhysicObject : MonoBehaviour
         set
         {
             _volume = value;
+            if (rb.useAutoMass)
+                density = mass / _volume;
             transform.localScale = _size * value;
             
         }
@@ -161,8 +211,11 @@ public class PhysicObject : MonoBehaviour
 
     private void Update()
     {
-        UpdatePhysic();
-        UpdateRecording();
+        if (!freezed)
+        {
+            UpdatePhysic();
+            UpdateRecording();
+        }
     }
 
     private void UpdatePhysic()
@@ -189,9 +242,8 @@ public class PhysicObject : MonoBehaviour
 
             if (rbTime > lastRecord + recordInterval)
             {
-
-                posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.velocity, rb.angularVelocity));
-                if (posRots.Count > maxPosRots) posRots.RemoveAt(0);
+                CreatePosRotPoint();
+                
                 lastRecord = rbTime;
             }
 
@@ -239,6 +291,12 @@ public class PhysicObject : MonoBehaviour
         if (rb.velocity.magnitude > 0.01f)
             rbTime += Time.deltaTime;
 
+    }
+
+    private void CreatePosRotPoint()
+    {
+        posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.velocity, rb.angularVelocity));
+        if (posRots.Count > maxPosRots) posRots.RemoveAt(0);
     }
 
 

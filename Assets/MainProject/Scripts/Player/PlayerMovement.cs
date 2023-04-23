@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private bool jumpInput;
     private bool useInput;
+    public IInteractable CurrentInteractable { get; set; } = null;
     private bool stickInput;
     private Vector2 mousePosInput;
 
@@ -64,6 +65,7 @@ public class PlayerMovement : MonoBehaviour
         UpdateMovement();
         UpdateTorque();
         UpdateParams();
+        UpdateUse();
     }
 
     private void UpdateMovement()
@@ -154,6 +156,18 @@ public class PlayerMovement : MonoBehaviour
         groundHit = OnGround();
         gravityAngle = Vector3.SignedAngle(Vector3.up, groundHit.normal, transform.forward);
 
+    }
+
+    private void UpdateUse()
+    {
+        if (CurrentInteractable != null)
+        {
+            if(useInput)
+            {
+                CurrentInteractable.Interact();
+                useInput = false;
+            }
+        }
     }
 
     private RaycastHit2D OnGround()
