@@ -32,6 +32,7 @@ public class PhysicObject : MonoBehaviour
     [SerializeField] private float _mass;
     [SerializeField] private float _volume;
     [SerializeField] private Vector2 _size;
+    private Vector2 _defaultSize;
     [SerializeField] private float _bounciness = 0;
     [SerializeField] private float _friction = 0.4f;
     [SerializeField] private float _timeScale;
@@ -59,6 +60,8 @@ public class PhysicObject : MonoBehaviour
     private int posRotRight;
     private int posRotLeft;
     private float lerpVal;
+    private Vector2 lerpVel;
+    private float lerpRot;
     private PhysicsMaterial2D physicsMaterial2D;
     private List<Joint2D> stickedObjects = new List<Joint2D>();
 
@@ -73,7 +76,6 @@ public class PhysicObject : MonoBehaviour
             {
                 rb.velocity = Vector2.zero;
                 rb.angularVelocity = 0;
-                posRots.Clear();
             }
             else
             {
@@ -98,7 +100,6 @@ public class PhysicObject : MonoBehaviour
             rb.gravityScale = value;
         }
     }
-
     public float density
     {
         get
@@ -110,7 +111,6 @@ public class PhysicObject : MonoBehaviour
             col.density = value;
         }
     }
-
     public float volume
     {
         get
@@ -126,7 +126,6 @@ public class PhysicObject : MonoBehaviour
             
         }
     }
-
     public float width
     {
         get
@@ -151,7 +150,6 @@ public class PhysicObject : MonoBehaviour
             transform.localScale = _size * _volume;
         }
     }
-
     public float bounciness
     {
         get
@@ -174,7 +172,6 @@ public class PhysicObject : MonoBehaviour
             _friction = value;
         }
     }
-
     public float timeScale
     {
         get
@@ -186,7 +183,6 @@ public class PhysicObject : MonoBehaviour
             _timeScale = value;
         }
     }
-
     public float timePosition
     {
         get
@@ -200,16 +196,17 @@ public class PhysicObject : MonoBehaviour
     }
     private void Start()
     {
-        _mass = rb.mass;
+        if (rb) _mass = rb.mass;
         _volume = 1;
         _size = transform.localScale;
+        _defaultSize = _size;
         timeScale = 1;
 
         physicsMaterial2D = new PhysicsMaterial2D();
 
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!freezed)
         {
@@ -222,81 +219,103 @@ public class PhysicObject : MonoBehaviour
     {
         if (timeScale >= 0)
         {
-            rb.AddForce(Physics2D.gravity * timeScale, ForceMode2D.Force);
+            if(rb) rb.AddForce(Physics2D.gravity * timeScale, ForceMode2D.Force);
         }
 
         physicsMaterial2D.bounciness = _bounciness;
         physicsMaterial2D.friction = _friction;
 
-        rb.sharedMaterial = physicsMaterial2D;
-        col.sharedMaterial = physicsMaterial2D;
+        if(rb) rb.sharedMaterial = physicsMaterial2D;
+        if(col) col.sharedMaterial = physicsMaterial2D;
 
     }
 
     private void UpdateRecording()
     {
-        if (doRecords)
+        if (rb)
         {
-            
-            rb.isKinematic = false;
-
-            if (rbTime > lastRecord + recordInterval)
+            if (timeScale > 0)
             {
-                CreatePosRotPoint();
-                
-                lastRecord = rbTime;
-            }
+                rb.isKinematic = false;
 
-            if (posRots.Count > 2)
-            {
-                posRotRight = posRots.Count - 1;
-                posRotLeft = posRots.Count - 2;
-            }
-
-            stopTime = rbTime;
-        }
-        else
-        {
-            rb.isKinematic = true;
-
-            timeline = stopTime + timePosition;
-
-            if (timeline > posRots[posRotRight].timeMark)
-            {
-                if (posRotRight < posRots.Count - 1)
+                if (lerpVel != Vector2.zero && lerpRot != 0)
                 {
-                    posRotRight++;
-                    posRotLeft++;
-                }
-            }
+                    rb.velocity = lerpVel;
+                    rb.angularVelocity = lerpRot;
 
-            if (timeline < posRots[posRotLeft].timeMark)
-            {
-                if (posRotLeft > 0)
+                    lerpVel = Vector2.zero;
+                    lerpRot = 0;
+                }
+
+
+                if (rbTime > lastRecord + recordInterval)
                 {
-                    posRotRight--;
-                    posRotLeft--;
+                    CreatePosRotPoint();
+
+                    lastRecord = rbTime;
                 }
+
+                if (posRots.Count > 2)
+                {
+                    posRotRight = posRots.Count - 1;
+                    posRotLeft = posRots.Count - 2;
+                }
+
+                stopTime = rbTime;
+            }
+            else
+            {
+                rb.isKinematic = true;
+
+                timeline = stopTime + timeScale;
+
+                if (timeline > posRots[posRotRight].timeMark)
+                {
+                    if (posRotRight < posRots.Count - 1)
+                    {
+                        posRotRight++;
+                        posRotLeft++;
+                    }
+                }
+
+                if (timeline < posRots[posRotLeft].timeMark)
+                {
+                    if (posRotLeft > 0)
+                    {
+                        posRotRight--;
+                        posRotLeft--;
+                    }
+                }
+
+                lerpVal = 1 - (timeline - posRots[posRotLeft].timeMark) / (posRots[posRotRight].timeMark - posRots[posRotLeft].timeMark);
+
+                transform.position = Vector2.Lerp(posRots[posRotRight].position, posRots[posRotLeft].position, lerpVal);
+                transform.rotation = Quaternion.Lerp(posRots[posRotRight].rotation, posRots[posRotLeft].rotation, lerpVal);
+
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0;
+
+                lerpVel = Vector2.Lerp(posRots[posRotRight].velocity, posRots[posRotLeft].velocity, lerpVal);
+                lerpRot = Mathf.Lerp(posRots[posRotRight].torque, posRots[posRotLeft].torque, lerpVal);
+
             }
 
-            lerpVal = 1 - (timeline - posRots[posRotLeft].timeMark) / (posRots[posRotRight].timeMark - posRots[posRotLeft].timeMark);
+            if (rb.velocity.magnitude > 0.01f)
+                rbTime += Time.deltaTime * timeScale;
 
-            transform.position = Vector2.Lerp(posRots[posRotRight].position, posRots[posRotLeft].position, lerpVal);
-            transform.rotation = Quaternion.Lerp(posRots[posRotRight].rotation, posRots[posRotLeft].rotation, lerpVal);
-
-            rb.velocity = Vector2.Lerp(posRots[posRotRight].velocity, posRots[posRotLeft].velocity, lerpVal);
-            rb.angularVelocity = Mathf.Lerp(posRots[posRotRight].torque, posRots[posRotLeft].torque, lerpVal);
         }
-
-        if (rb.velocity.magnitude > 0.01f)
-            rbTime += Time.deltaTime;
-
     }
 
     private void CreatePosRotPoint()
     {
         posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.velocity, rb.angularVelocity));
         if (posRots.Count > maxPosRots) posRots.RemoveAt(0);
+    }
+
+    public void ResetSize()
+    {
+        width = _defaultSize.x;
+        height = _defaultSize.y;
     }
 
 

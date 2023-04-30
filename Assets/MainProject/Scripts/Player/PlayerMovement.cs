@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float groundAcceleration = 1;
     [SerializeField] private float airAcceleration = 1;
     [SerializeField] private float waterAcceleration = 1;
+    [SerializeField] private float grabAcceleration = 1;
     [SerializeField] private float jumpForce = 1;
     [SerializeField] private float jumpDelay = 0.5f;
     private float lastGround = 0;
@@ -90,35 +91,42 @@ public class PlayerMovement : MonoBehaviour
             else
                 fixedJoint2D.enabled = false;
 
-            if (groundHit)
+            if (fixedJoint2D.enabled)
             {
-                if (groundHit.collider.gameObject.layer == LayerMask.NameToLayer("Water"))
-                {
-                    rb.AddForce(moveInput * waterAcceleration * Time.deltaTime, ForceMode2D.Force);
-
-                    if (jumpInput && Time.time > lastGround + jumpDelay)
-                    {
-                        rb.AddForce(transform.up * jumpForce * Time.deltaTime, ForceMode2D.Impulse);
-                    }
-                }
-                else
-                {
-                    float acceleration = groundHit ? groundAcceleration : airAcceleration;
-
-                    rb.AddForce((groundHit ? transform.right : Vector3.right) * moveInput * acceleration * Time.deltaTime, ForceMode2D.Force);
-
-                    if (jumpInput && Time.time > lastGround + jumpDelay)
-                    {
-                        rb.AddForce(transform.up * jumpForce * Time.deltaTime, ForceMode2D.Impulse);
-                    }
-                }
+                fixedJoint2D.connectedBody.AddForceAtPosition(moveInput * grabAcceleration,fixedJoint2D.anchor, ForceMode2D.Force);
             }
-
             else
             {
-                if (!groundHit)
-                    rb.AddForce(moveInput * airAcceleration * Time.deltaTime, ForceMode2D.Force);
-            }            
+                if (groundHit)
+                {
+                    if (groundHit.collider.gameObject.layer == LayerMask.NameToLayer("Water"))
+                    {
+                        rb.AddForce(moveInput * waterAcceleration, ForceMode2D.Force);
+
+                        if (jumpInput && Time.time > lastGround + jumpDelay)
+                        {
+                            rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+                        }
+                    }
+                    else
+                    {
+                        float acceleration = groundHit ? groundAcceleration : airAcceleration;
+
+                        rb.AddForce((groundHit ? transform.right : Vector3.right) * moveInput * acceleration, ForceMode2D.Force);
+
+                        if (jumpInput && Time.time > lastGround + jumpDelay)
+                        {
+                            rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+                        }
+                    }
+                }
+
+                else
+                {
+                    if (!groundHit)
+                        rb.AddForce(moveInput * airAcceleration, ForceMode2D.Force);
+                }
+            }
         }
     }
 
@@ -145,7 +153,7 @@ public class PlayerMovement : MonoBehaviour
                 else
                 {
                     rb.freezeRotation = false;
-                    rb.AddTorque(gravityAngle * rotateForce * Time.deltaTime);
+                    rb.AddTorque(gravityAngle * rotateForce);
                 }
             }
         }

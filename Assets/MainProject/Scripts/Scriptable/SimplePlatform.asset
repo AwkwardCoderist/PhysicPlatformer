@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e26986686ad4dec4180ef6c55db8e32f, type: 3}
-  m_Name: SimpleCrate
+  m_Name: SimplePlatform
   m_EditorClassIdentifier: 
-  massLimit: {x: -10, y: 10}
-  volumeLimit: {x: 1, y: 5}
-  timeScaleLimit: {x: -10, y: 1}
+  massLimit: {x: 0, y: 0}
+  volumeLimit: {x: 0, y: 0}
+  timeScaleLimit: {x: 0, y: 0}
   elastityKoefLimit: {x: 0, y: 1.25}
-  heightLimit: {x: 1, y: 15}
-  widthtLimit: {x: 1, y: 15}
-  frictionKoefLimit: {x: 0, y: 1}
+  heightLimit: {x: 0, y: 0}
+  widthtLimit: {x: 0, y: 0}
+  frictionKoefLimit: {x: 0, y: 0}

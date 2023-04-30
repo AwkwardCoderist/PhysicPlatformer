@@ -21,7 +21,7 @@ public class FormulaManager : MonoBehaviour
     [Header("Velocity Formula")]
     [SerializeField] private GameObject velocityUI;
     [SerializeField] private Slider distanceSlider;
-    [SerializeField] private Slider timePositionSlider;
+    [SerializeField] private Slider timeScaleSlider;
 
     [Header("Elasticity Formula")]
     [SerializeField] private GameObject elasticityUI;
@@ -82,15 +82,14 @@ public class FormulaManager : MonoBehaviour
                     break;
                 case Formula.Velocity:
                     distanceSlider.onValueChanged.RemoveAllListeners();
-                    timePositionSlider.onValueChanged.RemoveAllListeners();
+                    timeScaleSlider.onValueChanged.RemoveAllListeners();
                     
                     activeObject.DoRecords = false;
-                    activeObject.timePosition = 0;
 
-                    SetSliderValues(distanceSlider, limits.timePositionLimit, activeObject.mass);
-                    SetSliderValues(timePositionSlider, limits.timePositionLimit, activeObject.timePosition);
+                    SetSliderValues(distanceSlider, limits.timeScaleLimit, activeObject.mass);
+                    SetSliderValues(timeScaleSlider, limits.timeScaleLimit, activeObject.timeScale);
 
-                    timePositionSlider.onValueChanged.AddListener((x) => { activeObject.timePosition = x; });
+                    timeScaleSlider.onValueChanged.AddListener((x) => { activeObject.timeScale = x; });
 
 
                     velocityUI.SetActive(true);
@@ -158,7 +157,6 @@ public class FormulaManager : MonoBehaviour
 
     private void ResetActiveObject()
     {
-        activeObject.DoRecords = true;
         
     }
 }

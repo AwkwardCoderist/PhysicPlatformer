@@ -26,6 +26,7 @@ public class Respawner : MonoBehaviour
         if (objToTeleport.TryGetComponent(out physObj))
         {
             physObj.Freezed = true;
+            physObj.ResetSize();
         }
         else
             physObj = null;
@@ -39,6 +40,12 @@ public class Respawner : MonoBehaviour
         teleportPoint.localScale = Vector3.zero;
         objToTeleport.localPosition = Vector3.zero;
         objToTeleport.localEulerAngles = Vector3.zero;
+
+        if (objToTeleport.TryGetComponent(out physObj))
+        {
+            physObj.ResetSize();
+        }
+
         tweener.Restart();
 
     }
