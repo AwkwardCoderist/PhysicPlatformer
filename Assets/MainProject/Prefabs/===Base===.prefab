@@ -5496,7 +5496,7 @@ MonoBehaviour:
   m_BoundingVolume: {fileID: 0}
   m_BoundingShape2D: {fileID: 0}
   m_ConfineScreenEdges: 1
-  m_Damping: 2.2
+  m_Damping: 0
 --- !u!1 &6412401992085763445
 GameObject:
   m_ObjectHideFlags: 0
@@ -8265,7 +8265,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -10.19039, y: 1.93475}
+  m_AnchoredPosition: {x: 22.631733, y: 4.05}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!20 &6412401992378221119
@@ -9598,6 +9598,7 @@ GameObject:
   - component: {fileID: 6412401992509677699}
   - component: {fileID: 6412401992509677700}
   - component: {fileID: 6412401992509677701}
+  - component: {fileID: 249343339666256963}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -9745,6 +9746,20 @@ FixedJoint2D:
   m_ConnectedAnchor: {x: -8.36, y: 0.81}
   m_DampingRatio: 0
   m_Frequency: 0
+--- !u!114 &249343339666256963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6412401992509677820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78c7f03f802907c4085b576915bcfb45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbody2D: {fileID: 6412401992509677696}
+  forceAmount: 0
 --- !u!1 &6412401992528611679
 GameObject:
   m_ObjectHideFlags: 0

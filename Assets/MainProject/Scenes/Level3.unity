@@ -1312,11 +1312,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992083726337, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.48
+      value: -2.88
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992083726337, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.34
+      value: 4.63
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992329198112, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1336,19 +1336,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992378221252, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -2.48
+      value: 2.9735327
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992378221252, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 4.34
+      value: 6.6709275
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992509677822, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.48
+      value: -2.88
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992509677822, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.34
+      value: 4.63
       objectReference: {fileID: 0}
     - target: {fileID: 6412401992880978577, guid: 21ff9b5cf161d9941b176e357b5e5940, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1713,10 +1713,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 12.8, y: 8.382699}
-      - {x: -22.235474, y: 8.847234}
-      - {x: -19.755674, y: -2.8815765}
-      - {x: 13, y: -2.2569342}
+    - - {x: 4.339658, y: 9.943898}
+      - {x: -14.348202, y: 9.943898}
+      - {x: -14.3482, y: 2.82}
+      - {x: 4.339658, y: 2.82}
 --- !u!1 &1440031343
 GameObject:
   m_ObjectHideFlags: 0
