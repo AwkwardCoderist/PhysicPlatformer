@@ -8,6 +8,7 @@ public class Trigger : MonoBehaviour
     [SerializeField] private LayerMask reactLayers;
     [SerializeField] private bool invokeOnce = true;
     private bool invoked;
+    public bool Invoked { get =>  invoked; set { invoked = value; } }
     [SerializeField] private float timeToActivate = 0;
     private float timeInTrigger = 0;
     [SerializeField] private List<Transform> reactObjects = new List<Transform>();
@@ -51,6 +52,7 @@ public class Trigger : MonoBehaviour
         }
     }
 
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (reactLayers == (reactLayers | (1 << collision.gameObject.layer)))
@@ -60,5 +62,10 @@ public class Trigger : MonoBehaviour
 
             enteredObjects.Remove(collision.transform);
         }
+    }
+
+    public void ClearListOfObjects()
+    {
+        enteredObjects.Clear();
     }
 }

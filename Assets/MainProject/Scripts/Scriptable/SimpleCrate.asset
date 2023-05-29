@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SimpleCrate
   m_EditorClassIdentifier: 
   massLimit: {x: -10, y: 10}
-  volumeLimit: {x: 1, y: 5}
+  volumeLimit: {x: 1, y: 4}
   timeScaleLimit: {x: -10, y: 1}
   elastityKoefLimit: {x: 0, y: 1.25}
   heightLimit: {x: 1, y: 15}
