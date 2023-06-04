@@ -6,21 +6,41 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Animator anim;
+    [SerializeField] private Transform sprite;
     [SerializeField] private float groundAcceleration = 1;
     [SerializeField] private float airAcceleration = 1;
     [SerializeField] private float waterAcceleration = 1;
+    [SerializeField] private float waterJumpForce = 0.5f;
     [SerializeField] private float grabAcceleration = 1;
     [SerializeField] private float jumpForce = 1;
+    [SerializeField] private float jumpSideForce = 0.1f;
     [SerializeField] private float jumpDelay = 0.5f;
     private float lastGround = 0;
     [SerializeField] private float rotateForce = 1;
+    [SerializeField] private float landRotateSmoothness = 75;
 
     [Header("Ground Checks")]
     [SerializeField] private float checkDistance;
     [SerializeField] private Vector2 size;
     [SerializeField] private LayerMask groundLayers;
-    
 
+    [Header("Drops")]
+    [SerializeField] private Transform leftDrop;
+    [SerializeField] private Transform leftDropRoot;
+    [SerializeField] private Transform rightDrop;
+    [SerializeField] private Transform rightDropRoot;
+    [SerializeField] private float dropsOffset = 15;
+    [SerializeField] private float dropsSmoothness = 15;
+    [SerializeField] private float dropsForce = 1;
+    [SerializeField] private AnimationCurve leftRootCurve;
+    [SerializeField] private AnimationCurve rightRootCurve;
+    [SerializeField] private float rootLoopTime = 5;
+    private float rootRotateTime = 0;
+
+    [Header("Animations Params")]
+    [SerializeField] private float pushDistance = 0.5f;
+    [SerializeField] private LayerMask pushLayers;
 
     private Vector2 moveInput;
     private bool jumpInput;
@@ -67,6 +87,8 @@ public class PlayerMovement : MonoBehaviour
         UpdateTorque();
         UpdateParams();
         UpdateUse();
+        UpdateAnimator();
+        UpdateDrops();
     }
 
     private void UpdateMovement()
@@ -93,7 +115,8 @@ public class PlayerMovement : MonoBehaviour
 
             if (fixedJoint2D.enabled)
             {
-                fixedJoint2D.connectedBody.AddForceAtPosition(moveInput * grabAcceleration,fixedJoint2D.anchor, ForceMode2D.Force);
+                if(fixedJoint2D.connectedBody)
+                    fixedJoint2D.connectedBody.AddForceAtPosition(moveInput * grabAcceleration,fixedJoint2D.anchor, ForceMode2D.Force);
             }
             else
             {
@@ -105,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
 
                         if (jumpInput && Time.time > lastGround + jumpDelay)
                         {
-                            rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+                            rb.AddForce(transform.up * waterJumpForce, ForceMode2D.Impulse);
                         }
                     }
                     else
@@ -116,7 +139,7 @@ public class PlayerMovement : MonoBehaviour
 
                         if (jumpInput && Time.time > lastGround + jumpDelay)
                         {
-                            rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+                            rb.AddForce((transform.up * jumpForce) + (transform.right * moveInput.x * jumpSideForce), ForceMode2D.Impulse);
                         }
                     }
                 }
@@ -142,12 +165,12 @@ public class PlayerMovement : MonoBehaviour
                     {
 
                         rb.freezeRotation = false;
-                        rb.AddTorque(Vector3.SignedAngle(transform.up, rb.velocity, transform.forward));
+                        rb.AddTorque(Vector3.SignedAngle(transform.up, -Physics2D.gravity, transform.forward)*0.1f);
                     }
                     else
                     {
                         rb.freezeRotation = true;
-                        rb.SetRotation(gravityAngle);
+                        rb.SetRotation(Quaternion.RotateTowards(Quaternion.Euler(0,0,rb.rotation), Quaternion.Euler(0, 0, gravityAngle), Time.deltaTime * landRotateSmoothness));
                     }                    
                 }
                 else
@@ -178,6 +201,67 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void UpdateAnimator()
+    {
+        if (fixedJoint2D.enabled)
+        {
+            anim.Play("Player_grab");
+        }
+        else if (groundHit)
+        {
+            if (groundHit.collider.gameObject.layer == LayerMask.NameToLayer("Water"))
+            {
+                sprite.localScale = new Vector3(
+                    Mathf.Abs(sprite.transform.localScale.x) * Mathf.Sign(moveInput.x),
+                    anim.transform.localScale.y,
+                    anim.transform.localScale.z);
+
+                anim.Play("Player_swim");
+            }
+            else if (moveInput.x != 0)
+            {
+                sprite.localScale = new Vector3 (
+                    Mathf.Abs(sprite.transform.localScale.x) * Mathf.Sign(moveInput.x),
+                    anim.transform.localScale.y,
+                    anim.transform.localScale.z);
+
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * sprite.localScale.x, pushDistance, pushLayers);
+
+                if (hit)
+                    anim.Play("Player_runPush");
+                else
+                    anim.Play("Player_run");
+
+
+            }
+            else if(!anim.GetCurrentAnimatorStateInfo(0).IsName("Player_idle"))
+            {
+                anim.Play("Player_idle");
+            }
+        }
+        else
+        {
+            anim.Play("Player_fall");
+        }
+    }
+
+    private void UpdateDrops()
+    {
+        leftDropRoot.Rotate(0, 0, leftRootCurve.Evaluate(rootRotateTime / rootLoopTime) * dropsForce);
+        rightDropRoot.Rotate(0, 0, rightRootCurve.Evaluate(rootRotateTime / rootLoopTime) * dropsForce);
+
+        rootRotateTime += Time.deltaTime;
+            
+        if(rootRotateTime > rootLoopTime)
+        {
+            rootRotateTime = 0;
+        }
+
+        leftDrop.rotation = Quaternion.RotateTowards(leftDrop.rotation, Quaternion.LookRotation(transform.forward, -Physics2D.gravity) * Quaternion.Euler(0, 0, -dropsOffset), dropsSmoothness * Time.deltaTime);
+        rightDrop.rotation = Quaternion.RotateTowards(rightDrop.rotation, Quaternion.LookRotation(transform.forward, -Physics2D.gravity) * Quaternion.Euler(0, 0, dropsOffset), dropsSmoothness * Time.deltaTime);
+
+    }
+
     private RaycastHit2D OnGround()
     {
         return Physics2D.BoxCast(transform.position, size, 0, Physics2D.gravity.normalized, checkDistance, groundLayers);
@@ -195,5 +279,7 @@ public class PlayerMovement : MonoBehaviour
         }
         Gizmos.DrawWireCube(transform.position, size);
         Gizmos.DrawLine(rb.worldCenterOfMass, rb.worldCenterOfMass + Physics2D.gravity);
+
+        Gizmos.DrawLine(transform.position, transform.position + transform.right * sprite.localScale.x * pushDistance);
     }
 }
