@@ -33,7 +33,7 @@ public class Respawner : MonoBehaviour
 
         if (objToTeleport.TryGetComponent(out Rigidbody2D rb))
         {
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = 0;
         }
         objToTeleport.SetParent(teleportPoint);

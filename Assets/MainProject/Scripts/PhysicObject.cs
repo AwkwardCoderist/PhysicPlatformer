@@ -74,7 +74,7 @@ public class PhysicObject : MonoBehaviour
             freezed = value;
             if (freezed)
             {
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0;
             }
             else
@@ -240,7 +240,7 @@ public class PhysicObject : MonoBehaviour
 
                 if (lerpVel != Vector2.zero && lerpRot != 0)
                 {
-                    rb.velocity = lerpVel;
+                    rb.linearVelocity = lerpVel;
                     rb.angularVelocity = lerpRot;
 
                     lerpVel = Vector2.zero;
@@ -292,7 +292,7 @@ public class PhysicObject : MonoBehaviour
                 transform.position = Vector2.Lerp(posRots[posRotRight].position, posRots[posRotLeft].position, lerpVal);
                 transform.rotation = Quaternion.Lerp(posRots[posRotRight].rotation, posRots[posRotLeft].rotation, lerpVal);
 
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0;
 
                 lerpVel = Vector2.Lerp(posRots[posRotRight].velocity, posRots[posRotLeft].velocity, lerpVal);
@@ -300,7 +300,7 @@ public class PhysicObject : MonoBehaviour
 
             }
 
-            if (rb.velocity.magnitude > 0.01f)
+            if (rb.linearVelocity.magnitude > 0.01f)
                 rbTime += Time.deltaTime * timeScale;
 
         }
@@ -308,7 +308,7 @@ public class PhysicObject : MonoBehaviour
 
     private void CreatePosRotPoint()
     {
-        posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.velocity, rb.angularVelocity));
+        posRots.Add(new PosRot(transform.position, transform.rotation, rbTime, rb.linearVelocity, rb.angularVelocity));
         if (posRots.Count > maxPosRots) posRots.RemoveAt(0);
     }
 

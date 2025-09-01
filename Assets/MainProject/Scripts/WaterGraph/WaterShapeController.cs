@@ -27,12 +27,12 @@ public class WaterShapeController : MonoBehaviour
 
     void Start()
     {
-
+        StartCoroutine(CreateWaves());
     }
     void OnValidate()
     {
         // Clean waterpoints 
-        StartCoroutine(CreateWaves());
+        //StartCoroutine(CreateWaves());
     }
     IEnumerator CreateWaves()
     {
@@ -163,6 +163,9 @@ public class WaterShapeController : MonoBehaviour
                 springs[i + 1].velocity += right_deltas[i];
             }
         }
+
+        spriteShapeController.RefreshSpriteShape();
+        spriteShapeController.BakeMesh();
     }
     private void Splash(int index, float speed)
     {

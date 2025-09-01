@@ -61,7 +61,7 @@ public class WaterSpring : MonoBehaviour
         if (fallingObject)
         {
             Rigidbody2D rb = fallingObject.rigidbody2D;
-            var speed = rb.velocity;
+            var speed = rb.linearVelocity;
 
             velocity += speed.y / resistance;
             Debug.Log(velocity);
